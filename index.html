@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>南审招新AI - 新人社团导航 v2.0</title>
+<style>
+    :root { --nau-blue: #0a1f44; --nau-blue-light: #1a3c70; --bg-color: #f4f6f9; --text-main: #1f2937; --text-sub: #6b7280; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    body { background: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden; }
+    #app { width: 100%; max-width: 1200px; background: var(--bg-color); position: relative; min-height: 100vh; }
+    
+    /* 登录页 */
+    .login-page { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #f9fafb; }
+    .login-logo { width: 60px; height: 60px; background: var(--nau-blue); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin-bottom: 20px; }
+    .login-title { font-size: 24px; font-weight: bold; margin-bottom: 8px; }
+    .login-subtitle { font-size: 14px; color: var(--text-sub); margin-bottom: 30px; }
+    .login-box { background: white; width: 400px; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+    .role-switch { display: flex; background: #f0f4f8; border-radius: 8px; margin-bottom: 20px; padding: 4px; }
+    .role-btn { flex: 1; text-align: center; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; color: var(--text-sub); transition: 0.3s; }
+    .role-btn.active { background: white; color: var(--nau-blue); font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .input-group { margin-bottom: 20px; }
+    .input-group label { display: block; font-size: 13px; color: var(--text-sub); margin-bottom: 8px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; }
+    .input-group input:focus { border-color: var(--nau-blue); box-shadow: 0 0 0 3px rgba(10,31,68,0.1); }
+    .login-btn { width: 100%; padding: 14px; background: var(--nau-blue); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+    .login-btn:hover { background: var(--nau-blue-light); }
+
+    /* 顶部导航 */
+    .header { background: white; padding: 0 40px; height: 70px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 10; }
+    .header .logo { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .header .logo-icon { width: 32px; height: 32px; background: var(--nau-blue); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .nav-links { display: flex; gap: 30px; font-size: 15px; color: var(--text-sub); }
+    .nav-links div { cursor: pointer; padding: 24px 0; position: relative; }
+    .nav-links div.active { color: var(--nau-blue); font-weight: bold; }
+    .nav-links div.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--nau-blue); border-radius: 3px 3px 0 0; }
+
+    /* 通用视图 */
+    .view { display: none; padding: 30px 40px; }
+    .view.active { display: block; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* 首页 */
+    .home-layout { display: flex; gap: 30px; }
+    .left-col { flex: 1; }
+    .right-col { width: 320px; }
+    .hero { background: linear-gradient(135deg, #091b3d, #16376b); border-radius: 20px; padding: 40px; color: white; margin-bottom: 30px; }
+    .hero h1 { font-size: 32px; margin-bottom: 12px; line-height: 1.4; }
+    .hero p { font-size: 14px; opacity: 0.8; margin-bottom: 30px; }
+    
+    .section-title { font-size: 18px; font-weight: bold; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .section-title span { font-size: 13px; color: var(--nau-blue); cursor: pointer; font-weight: normal; }
+    
+    /* 社团卡片 */
+    .club-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .club-grid.full { grid-template-columns: repeat(3, 1fr); }
+    .club-card { background: white; border-radius: 16px; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: 0.3s; }
+    .club-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .club-cover { height: 140px; display: flex; align-items: center; justify-content: center; color: white; font-size: 40px; }
+    .club-info { padding: 16px; }
+    .club-info h3 { font-size: 16px; margin-bottom: 8px; }
+    .club-info p { font-size: 12px; color: var(--text-sub); line-height: 1.5; margin-bottom: 12px; }
+    .tags { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tag { font-size: 11px; background: #f0f4f8; color: var(--nau-blue); padding: 4px 8px; border-radius: 4px; }
+    .btn-outline { width: 100%; padding: 10px; border: 1px solid var(--nau-blue); color: var(--nau-blue); background: transparent; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    
+    /* 右侧测试框 */
+    .match-test-box { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); text-align: center; }
+    .match-test-box h3 { font-size: 16px; margin-bottom: 10px; color: var(--nau-blue); }
+    .match-test-box p { font-size: 13px; color: var(--text-sub); margin-bottom: 15px; }
+    .btn-primary { padding: 10px 20px; background: var(--nau-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s;}
+    .btn-primary:hover { background: var(--nau-blue-light); }
+
+    /* 测试问卷页 */
+    .test-container { max-width: 700px; margin: 0 auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+    .progress-bar { height: 8px; background: #e5e7eb; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+    .progress-inner { height: 100%; background: var(--nau-blue); width: 33%; transition: 0.5s; }
+    .question { font-size: 20px; font-weight: bold; margin-bottom: 30px; }
+    .option { padding: 16px 20px; border: 1px solid #e5e7eb; border-radius: 12px; margin-bottom: 15px; cursor: pointer; transition: 0.2s; }
+    .option:hover { border-color: var(--nau-blue); background: #f8fafc; }
+    .option.selected { border-color: var(--nau-blue); background: #f0f4f8; font-weight: bold; color: var(--nau-blue); }
+
+    /* 我的申请页 */
+    .apply-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+    .status-pending { background: #fef3c7; color: #d97706; }
+
+    /* 详情页 */
+    .detail-header { background: linear-gradient(135deg, #091b3d, #16376b); border-radius: 20px; padding: 30px; color: white; display: flex; gap: 30px; margin-bottom: 30px; align-items: center; }
+    .detail-avatar { width: 100px; height: 100px; border-radius: 16px; background: rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:40px; flex-shrink: 0; }
+    .detail-title h1 { font-size: 28px; margin-bottom: 10px; }
+    .detail-body { display: flex; gap: 30px; }
+    .detail-main { flex: 1; background: white; border-radius: 16px; padding: 30px; }
+    .detail-side { width: 320px; background: white; border-radius: 16px; padding: 30px; height: fit-content; }
+    .detail-section { margin-bottom: 30px; }
+    .detail-section h2 { font-size: 18px; margin-bottom: 16px; border-left: 4px solid var(--nau-blue); padding-left: 10px; }
+    .detail-section p { font-size: 14px; line-height: 1.8; color: #4b5563; }
+    .timeline-item { display: flex; gap: 16px; margin-bottom: 16px; font-size: 13px; }
+    .timeline-date { color: var(--nau-blue); font-weight: bold; width: 80px; flex-shrink: 0; }
+    .action-btns { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-apply { flex: 1; padding: 12px; background: #fbbf24; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
+
+    /* AI 悬浮助手 */
+    .ai-fab { position: fixed; bottom: 40px; right: 40px; width: 60px; height: 60px; background: linear-gradient(135deg, #091b3d, #16376b); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; cursor: pointer; box-shadow: 0 4px 15px rgba(10,31,68,0.4); transition: 0.3s; z-index: 100; }
+    .ai-fab:hover { transform: scale(1.1); }
+    .ai-chat-window { position: fixed; bottom: 110px; right: 40px; width: 350px; height: 450px; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 100; overflow: hidden; border: 1px solid #e5e7eb; }
+    .ai-chat-window.show { display: flex; animation: slideUp 0.3s ease; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .ai-header { background: var(--nau-blue); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .ai-close { cursor: pointer; font-size: 18px; }
+    .ai-messages { flex: 1; padding: 15px; overflow-y: auto; background: #f9fafb; display: flex; flex-direction: column; gap: 10px; }
+    .msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; }
+    .msg.bot { background: white; border: 1px solid #e5e7eb; align-self: flex-start; border-bottom-left-radius: 2px; }
+    .msg.user { background: var(--nau-blue); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .ai-input-area { padding: 10px; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; background: white; }
+    .ai-input-area input { flex: 1; border: 1px solid #e5e7eb; padding: 10px; border-radius: 20px; outline: none; font-size: 13px; }
+    .ai-input-area button { background: var(--nau-blue); color: white; border: none; padding: 0 15px; border-radius: 20px; cursor: pointer; }
+
+    .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div id="app">
+    <!-- 登录页 -->
+    <div id="page-login" class="login-page">
+        <div class="login-logo">A</div>
+        <div class="login-title">南京审计大学</div>
+        <div class="login-subtitle">新人社团导航 · 统一身份认证 (v2.0)</div>
+        <div class="login-box">
+            <div class="role-switch">
+                <div class="role-btn active" onclick="setRole('student')">学生登录</div>
+                <div class="role-btn" onclick="setRole('admin')">管理员登录</div>
+            </div>
+            <div class="input-group"><label>学号 / 工号</label><input type="text" id="login-id" placeholder="请输入您的学号"></div>
+            <div class="input-group"><label>密码</label><input type="password" id="login-pwd" placeholder="请输入密码"></div>
+            <button class="login-btn" onclick="handleLogin()">立即登录</button>
+        </div>
+    </div>
+
+    <!-- 主应用 -->
+    <div id="page-app" class="hidden">
+        <header class="header">
+            <div class="logo" onclick="switchPage('home')"><div class="logo-icon">A</div> 南审招新AI</div>
+            <div class="nav-links">
+                <div id="nav-home" class="active" onclick="switchPage('home')">首页</div>
+                <div id="nav-clubs" onclick="switchPage('clubs')">社团广场</div>
+                <div id="nav-test" onclick="switchPage('test')">AI性格测试</div>
+                <div id="nav-apply" onclick="switchPage('apply')">我的申请</div>
+            </div>
+            <div style="font-size: 20px; cursor:pointer;" onclick="logout()" title="退出登录">👤</div>
+        </header>
+
+        <!-- 1. 首页 -->
+        <div id="view-home" class="view active">
+            <div class="home-layout">
+                <div class="left-col">
+                    <div class="hero">
+                        <h1>你好，南审新同学！<br>开启你的精彩校园生活</h1>
+                        <p>面对繁杂的社团招新信息感到迷茫？让AI助你一键匹配最适合你的组织。</p>
+                    </div>
+                    <div class="section-title">为你推荐的社团 <span onclick="switchPage('clubs')">查看全部 ></span></div>
+                    <div class="club-grid" id="home-club-list">
+                        <!-- JS 动态渲染 -->
+                    </div>
+                </div>
+                <div class="right-col">
+                    <div class="match-test-box">
+                        <h3>✨ 找不到方向？</h3>
+                        <p>完成 3 道趣味问答，AI 帮你测出最适合的社团基因！</p>
+                        <button class="btn-primary" onclick="switchPage('test')">开始测试</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 社团广场 -->
+        <div id="view-clubs" class="view">
+            <div class="page-title" style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">社团广场</div>
+            <div class="club-grid full" id="all-club-list">
+                <!-- JS 动态渲染 -->
+            </div>
+        </div>
+
+        <!-- 3. 性格测试 -->
+        <div id="view-test" class="view">
+            <div class="test-container">
+                <div class="section-title">探索你的社团基因 <span>进度: 1/3</span></div>
+                <div class="progress-bar"><div class="progress-inner"></div></div>
+                <div class="question">在周末的闲暇时光，你更倾向于？</div>
+                <div class="option" onclick="selectOption(this)">A. 独自在图书馆钻研感兴趣的专业课题</div>
+                <div class="option" onclick="selectOption(this)">B. 组织朋友们进行一场户外运动或桌游聚会</div>
+                <div class="option" onclick="selectOption(this)">C. 参加志愿者活动或社区服务</div>
+                <div style="text-align: right; margin-top: 30px;">
+                    <button class="btn-primary" style="width: auto;" onclick="alert('AI正在分析你的性格... \n\n分析结果：你适合加入【校学生会·秘书处】和【青年志愿者协会】！')">下一题 / 查看结果</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 我的申请 -->
+        <div id="view-apply" class="view">
+            <div class="page-title" style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">我的申请进度</div>
+            <div class="apply-card">
+                <div><h3 style="font-size: 16px;">南审广播台 - 播音部</h3><p style="font-size: 13px; color: #6b7280; margin-top: 5px;">提交时间：2026-09-15</p></div>
+                <div class="status-badge status-pending">待审核</div>
+            </div>
+        </div>
+
+        <!-- 5. 详情页 -->
+        <div id="view-detail" class="view">
+            <div class="detail-header">
+                <div class="detail-avatar" id="detail-emoji">🎙️</div>
+                <div class="detail-title">
+                    <h1 id="detail-name">社团名称</h1>
+                    <p id="detail-desc">社团简介...</p>
+                    <div class="action-btns">
+                        <button class="btn-apply" onclick="alert('报名表已提交！可在“我的申请”中查看进度。')">立即报名</button>
+                        <button class="btn-outline" style="flex:1; color: white; border-color: white;" onclick="toggleAIChat()">咨询AI助手</button>
+                    </div>
+                </div>
+            </div>
+            <div class="detail-body">
+                <div class="detail-main">
+                    <div class="detail-section">
+                        <h2>社团介绍</h2>
+                        <p id="detail-intro"></p>
+                    </div>
+                </div>
+                <div class="detail-side">
+                    <div class="detail-section">
+                        <h2>招新要求</h2>
+                        <p id="detail-req" style="font-size:13px; line-height: 2;"></p>
+                    </div>
+                    <div class="detail-section" style="margin-bottom:0;">
+                        <h2>招新流程</h2>
+                        <div id="detail-process"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI 助手 -->
+    <div class="ai-fab" id="ai-fab" onclick="toggleAIChat()">🤖</div>
+    <div class="ai-chat-window" id="ai-chat">
+        <div class="ai-header"><span>南审小AI 助手</span><span class="ai-close" onclick="toggleAIChat()">×</span></div>
+        <div class="ai-messages" id="ai-messages">
+            <div class="msg bot">你好！我是南审招新 AI 助手。你可以问我“零基础能进什么社团”或者“广播台、ACM怎么样”。</div>
+        </div>
+        <div class="ai-input-area">
+            <input type="text" id="ai-input" placeholder="输入你的问题..." onkeypress="handleEnter(event)">
+            <button onclick="sendMessage()">发送</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ================= 数据层 ================= */
+    const clubsData = [
+        {
+            id: 1, name: '南审广播台 (NAU Radio)', emoji: '🎙️', bg: '#2d3748',
+            desc: '用声音传递温暖，用文字记录校园。期待每一个热爱表达的你。',
+            intro: '南京审计大学广播台成立于1990年，是直属于校党委宣传部的学生组织。我们不仅是校园信息的传播者，更是校园文化的引领者。目前设有播音部、编辑部、技术部、外联部及新媒体部五个核心部门。在这里，你可以接触到专业的录音设备，学习音频剪辑技术，撰写深度校园稿件。',
+            req: '1. 面向全校2026级本科新生，不限专业。<br>2. 热爱广播事业，具备良好的团队协作精神。<br>3. 播音部要求普通话标准（二甲以上优先）。<br>4. 编辑部及新媒体部需具备一定文字功底。',
+            process: [
+                { date: '9月10-20日', text: '在线报名' },
+                { date: '9月22-23日', text: '初试面试' },
+                { date: '9月25-10月', text: '复试/试用期' },
+                { date: '10月中旬', text: '正式录取' }
+            ]
+        },
+        {
+            id: 2, name: '校学生会·秘书处', emoji: '💼', bg: '#4a5568',
+            desc: '负责全校性活动的统筹与协调，锻炼你的组织能力。',
+            intro: '秘书处是校学生会的核心枢纽部门，负责统筹协调各类大型校园活动，起草公文，管理物资和财务报销。在这里，你将学会如何严谨地处理文件，如何高效地沟通协调，如何成为一个全能型的幕后推手。',
+            req: '1. 工作细心负责，有较强的执行力。<br>2. 具备良好的沟通能力和团队合作意识。<br>3. 熟练掌握 Word、Excel 等办公软件。<br>4. 具备一定的抗压能力，能平衡好学习与工作。',
+            process: [
+                { date: '9月12-18日', text: '简历投递' },
+                { date: '9月20日', text: '无领导小组讨论' },
+                { date: '9月22日', text: '压力面试' },
+                { date: '9月25日', text: '名单公示' }
+            ]
+        },
+        {
+            id: 3, name: 'ACM 算法协会', emoji: '💻', bg: '#64748b',
+            desc: '每周算法训练，组队参加各类程序设计竞赛。',
+            intro: 'ACM算法协会致力于培养优秀的程序设计人才，代表学校参加蓝桥杯、ICPC等重大赛事。我们每周举办算法训练营，定期开展模拟赛。无论你是有基础的编程大佬，还是零基础的小白，只要你对代码有热情，我们都欢迎你的加入。',
+            req: '1. 对编程和算法有浓厚兴趣（零基础可教）。<br>2. 具备一定的逻辑思维能力。<br>3. 能够坚持每周至少 5 小时的算法训练。<br>4. 有 C/C++、Java 或 Python 基础者优先。',
+            process: [
+                { date: '9月18日', text: '宣讲会及报名' },
+                { date: '9月25日', text: '线上摸底测试' },
+                { date: '10月8日', text: '零基础体验课' },
+                { date: '10月15日', text: '正式入队集训' }
+            ]
+        },
+        {
+            id: 4, name: '青年志愿者协会', emoji: '🌱', bg: '#718096',
+            desc: '微小的行动汇聚起来，就是改变世界的力量。',
+            intro: '青协长期开展社区支教、敬老院探访、校园环保、大型赛会志愿服务等公益活动。加入青协，你不仅能够获得官方认证的志愿时长，更能在帮助他人的过程中收获感动与成长，结识一群志同道合、充满爱心的朋友。',
+            req: '1. 拥有一颗热爱公益、乐于奉献的心。<br>2. 有责任感，能按时参加志愿活动。<br>3. 具备较强的亲和力和沟通能力。<br>4. 不限专业，全校新生均可报名。',
+            process: [
+                { date: '9月15日', text: '招新宣讲及报名' },
+                { date: '9月20日', text: '面试交流' },
+                { date: '9月24日', text: '破冰见面会' },
+                { date: '10月1日', text: '参与首次志愿活动' }
+            ]
+        }
+    ];
+
+    /* ================= 逻辑控制层 ================= */
+    let currentRole = 'student';
+
+    // 页面初始化渲染社团列表
+    function renderClubs() {
+        const homeList = document.getElementById('home-club-list');
+        const allList = document.getElementById('all-club-list');
+        
+        let homeHTML = '';
+        let allHTML = '';
+
+        clubsData.forEach(club => {
+            const cardHTML = `
+                <div class="club-card" onclick="goToDetail(${club.id})">
+                    <div class="club-cover" style="background: ${club.bg};">${club.emoji}</div>
+                    <div class="club-info">
+                        <h3>${club.name}</h3>
+                        <p>${club.desc}</p>
+                        <div class="tags"><span class="tag">正在招新</span></div>
+                        <button class="btn-outline">了解详情</button>
+                    </div>
+                </div>
+            `;
+            allHTML += cardHTML;
+            if(club.id <= 2) homeHTML += cardHTML; // 首页只显示前两个
+        });
+
+        homeList.innerHTML = homeHTML;
+        allList.innerHTML = allHTML;
+    }
+
+    // 登录相关
+    function setRole(role) {
+        currentRole = role;
+        document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    function handleLogin() {
+        const id = document.getElementById('login-id').value;
+        if (!id) { alert('请输入学号'); return; }
+        document.getElementById('page-login').classList.add('hidden');
+        document.getElementById('page-app').classList.remove('hidden');
+        renderClubs();
+        if (currentRole === 'admin') alert('管理员登录成功！数据看板将在 v3.0 版本开放。');
+    }
+
+    function logout() {
+        document.getElementById('page-app').classList.add('hidden');
+        document.getElementById('page-login').classList.remove('hidden');
+        document.getElementById('login-id').value = '';
+        document.getElementById('login-pwd').value = '';
+    }
+
+    // 页面切换
+    function switchPage(pageName) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-links div').forEach(n => n.classList.remove('active'));
+        
+        if (pageName === 'home') { document.getElementById('view-home').classList.add('active'); document.getElementById('nav-home').classList.add('active'); }
+        else if (pageName === 'clubs') { document.getElementById('view-clubs').classList.add('active'); document.getElementById('nav-clubs').classList.add('active'); }
+        else if (pageName === 'test') { document.getElementById('view-test').classList.add('active'); document.getElementById('nav-test').classList.add('active'); }
+        else if (pageName === 'apply') { document.getElementById('view-apply').classList.add('active'); document.getElementById('nav-apply').classList.add('active'); }
+        
+        window.scrollTo(0, 0);
+    }
+
+    // 进入详情页（核心逻辑：根据 ID 动态渲染数据）
+    function goToDetail(id) {
+        const club = clubsData.find(c => c.id === id);
+        if (!club) return;
+
+        document.getElementById('detail-emoji').innerText = club.emoji;
+        document.getElementById('detail-name').innerText = club.name;
+        document.getElementById('detail-desc').innerText = club.desc;
+        document.getElementById('detail-intro').innerText = club.intro;
+        document.getElementById('detail-req').innerHTML = club.req;
+
+        const processHTML = club.process.map(p => `
+            <div class="timeline-item">
+                <div class="timeline-date">${p.date}</div>
+                <div>${p.text}</div>
+            </div>
+        `).join('');
+        document.getElementById('detail-process').innerHTML = processHTML;
+
+        // 切换视图
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-links div').forEach(n => n.classList.remove('active'));
+        document.getElementById('view-detail').classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    // 测试问卷交互
+    function selectOption(el) {
+        document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    /* ================= AI 聊天逻辑 ================= */
+    function toggleAIChat() {
+        document.getElementById('ai-chat').classList.toggle('show');
+    }
+
+    function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
+
+    function sendMessage() {
+        const input = document.getElementById('ai-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const messages = document.getElementById('ai-messages');
+        messages.innerHTML += `<div class="msg user">${text}</div>`;
+        input.value = '';
+        messages.scrollTop = messages.scrollHeight;
+
+        setTimeout(() => {
+            let reply = "你可以尝试问我关于“零基础”、“面试”、“广播台”或者“ACM”的问题哦。";
+            
+            if (text.includes('零基础') || text.includes('新手')) {
+                reply = "零基础强烈推荐你加入【青年志愿者协会】或者【ACM算法协会】。青协看重爱心，ACM有针对新手的培训课程，都很包容！";
+            } else if (text.includes('面试') || text.includes('难吗')) {
+                reply = "大部分社团的面试主要是了解你的性格和意愿，不用太紧张。学生会秘书处可能会有无领导小组讨论，可以提前准备一下。";
+            } else if (text.includes('广播台') || text.includes('声音')) {
+                reply = "【南审广播台】是非常棒的校级组织！有播音、编辑、技术等部门，如果你普通话好或者文字功底强，一定要去试试。";
+            } else if (text.includes('ACM') || text.includes('算法') || text.includes('代码') || text.includes('编程')) {
+                reply = "【ACM算法协会】是技术大佬的聚集地。虽然听起来很难，但他们有零基础体验课。如果你对打比赛感兴趣，点击社团广场可以看他们的具体介绍！";
+            } else if (text.includes('秘书处') || text.includes('学生会')) {
+                reply = "【校学生会·秘书处】超级锻炼人！负责统筹和协调，能学到很多办公技能，对未来工作很有帮助。";
+            } else if (text.includes('志愿者') || text.includes('公益')) {
+                reply = "【青年志愿者协会】可以赚志愿时长，还能认识很多有爱心的同学，活动非常丰富。";
+            }
+            
+            messages.innerHTML += `<div class="msg bot">${reply}</div>`;
+            messages.scrollTop = messages.scrollHeight;
+        }, 800);
+    }
+</script>
+</body>
+</html>
